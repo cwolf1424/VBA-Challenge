@@ -1,0 +1,175 @@
+Sub stock_sum():
+
+For Each ws In Worksheets
+
+'--------------
+
+    ws.Range("I1") = "Ticker"
+    ws.Range("J1") = "Yearly Change"
+    ws.Range("K1") = "Percent Change"
+    ws.Range("L1") = "Total Stock Volume"
+    ws.Range("O2") = "Greatest % Increase"
+    ws.Range("O3") = "Greatest % Decrease"
+    ws.Range("O4") = "Greatest Total Volume"
+    ws.Range("P1") = "Ticker"
+    ws.Range("Q1") = "Value"
+    
+'--------------
+
+    Dim last_row As Long
+    
+    last_row = ws.Cells(Rows.Count, 1).End(xlUp).row
+
+'---------------
+    Dim row As Long
+    Dim cur_tkr As String
+    Dim cur_open As Double
+    Dim cur_close As Double
+    Dim cur_vol As Double
+    Dim cur_vol_total As Double
+    Dim cur_cell As String
+    Dim last_cell As String
+    
+    Dim cur_list_row As Long
+    cur_list_row = 1
+
+    'For all rows of tickers
+    For row = 2 To last_row
+      
+      cur_tkr = ws.Cells(row, 1).Value
+      next_tkr = ws.Cells((row + 1), 1).Value
+      last_tkr = ws.Cells((row - 1), 1).Value
+      cur_open = ws.Cells(row, 3).Value
+      cur_close = ws.Cells(row, 6).Value
+      cur_vol = ws.Cells(row, 7).Value
+      
+      
+      
+      
+      'If the current ticker is different from the last ticker
+      If ((cur_tkr) <> (last_tkr)) Then
+      
+        'Add the ticker to the list in a new row
+        cur_list_row = cur_list_row + 1
+        ws.Cells((cur_list_row), 9) = cur_tkr
+        
+        'Begin a new ticker yearly change list entry
+        ws.Cells((cur_list_row), 10) = cur_open
+        
+        'Begin a new ticker yearly percent change list entry
+        ws.Cells((cur_list_row), 11) = cur_open
+        
+        'Begin a new ticker volume count list entry
+        ws.Cells((cur_list_row), 12) = cur_vol
+        
+      
+      End If
+      
+      'If the current ticker is different from the next ticker
+      If ((cur_tkr) <> (next_tkr)) Then
+      
+        'Calculate extisting ticker yearly change list entry
+        ws.Cells((cur_list_row), 10) = cur_close - ws.Cells((cur_list_row), 10)
+            
+            'If the ticker yearly change list entry is positive
+            If (ws.Cells((cur_list_row), 10) > 0) Then
+                  
+                'Turn it green
+                ws.Cells((cur_list_row), 10).Interior.ColorIndex = 4
+            
+            'If the ticker yearly change list entry is negative
+            ElseIf ((ws.Cells((cur_list_row), 10) < 0)) Then
+                
+                'Turn it red
+                ws.Cells((cur_list_row), 10).Interior.ColorIndex = 3
+            
+            End If
+        
+        'Calculate extisting ticker yearly percent change list entry
+        ws.Cells((cur_list_row), 11) = ((cur_close - ws.Cells((cur_list_row), 11)) / (ws.Cells((cur_list_row), 11)))
+        
+            'If the ticker yearly change list entry is positive
+            If (ws.Cells((cur_list_row), 11) > 0) Then
+                  
+                'Turn it green
+                ws.Cells((cur_list_row), 11).Interior.ColorIndex = 4
+            
+            'If the ticker yearly change list entry is negative
+            ElseIf ((ws.Cells((cur_list_row), 11) < 0)) Then
+                
+                'Turn it red
+                ws.Cells((cur_list_row), 11).Interior.ColorIndex = 3
+            End If
+        
+      End If
+    
+      'If the current ticker is the same as the last ticker
+      If ((cur_tkr) = (last_tkr)) Then
+      
+        'Add the current volume to the existing running total for that list ticker
+        ws.Cells((cur_list_row), 12).Value = ws.Cells((cur_list_row), 12).Value + cur_vol
+      
+      End If
+      
+    Next row
+    
+'---------------
+    
+    Dim list_last_row As Long
+    
+    'Find the last row of the list
+    list_last_row = ws.Cells(Rows.Count, 9).End(xlUp).row
+    
+'---------------
+    
+    Dim current_list_tkr As String
+    Dim greatest_per_increase As Double
+    Dim greatest_per_decrease As Double
+    Dim greatest_vol As Double
+    
+    greatest_per_increase = 0
+    greatest_per_decrease = 0
+    greatest_vol = 0
+    
+    'For all the listed ticker symbols
+    For row = 2 To list_last_row
+    
+    cur_list_tkr = ws.Cells(row, 9).Value
+    
+    'If current percent change is the greatest thus far
+    If (ws.Cells(row, 11) > greatest_per_increase) Then
+            
+        'It becomes the greatest percent increase
+        greatest_per_increase = ws.Cells(row, 11).Value
+        ws.Range("Q2") = greatest_per_increase
+        ws.Range("P2") = cur_list_tkr
+    
+    'If current percent change is the lowest thus far
+    ElseIf (ws.Cells(row, 11) < greatest_per_decrease) Then
+        
+        'It becomes the greatest percent decrease
+        greatest_per_decrease = ws.Cells(row, 11).Value
+        ws.Range("Q3") = greatest_per_decrease
+        ws.Range("P3") = cur_list_tkr
+        
+    End If
+    
+    'If the current volume is the greatest thus far
+    If (ws.Cells(row, 12) > greatest_vol) Then
+        
+        'It becomes the greatest volume
+        greatest_vol = ws.Cells(row, 12).Value
+        ws.Range("Q4") = greatest_vol
+        ws.Range("P4") = cur_list_tkr
+    
+    End If
+    
+    
+    Next row
+
+'---------------
+Next ws
+
+End Sub
+
+
